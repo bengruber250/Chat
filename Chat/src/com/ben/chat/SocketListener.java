@@ -1,45 +1,40 @@
 package com.ben.chat;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+
 public class SocketListener extends Thread {
-
-	public SocketListener() {
-		// TODO Auto-generated constructor stub
+	private User user;
+	private DataInputStream dIn;
+	public SocketListener(User user) {
+		this.user = user;
+		dIn = user.getInputStream();
 	}
-
-	public SocketListener(Runnable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
+	public void run(){
+		boolean done = false;
+		try {
+			while(!done) {
+				byte messageType = dIn.readByte();
+				switch(messageType)
+				{
+				case 1: // Message
+					Server.printMessage(dIn.readUTF(), user);
+					break;
+				case 2: // Command
+					switch(dIn.readUTF()){
+					case "name":
+						user.setName(dIn.readUTF());
+					}
+					break;
+				case -1: // Close Connection
+					Server.removeUser(user);
+					user.close();
+					done = true;
+					break;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-
-	public SocketListener(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, Runnable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, String arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(Runnable arg0, String arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, Runnable arg1, String arg2) {
-		super(arg0, arg1, arg2);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, Runnable arg1, String arg2,
-			long arg3) {
-		super(arg0, arg1, arg2, arg3);
-		// TODO Auto-generated constructor stub
-	}
-
 }
