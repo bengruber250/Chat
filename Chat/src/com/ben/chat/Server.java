@@ -13,40 +13,30 @@ public class Server {
 	 * @param args
 	 * @throws IOException 
 	 */
-	private static ArrayList<DataOutputStream> outs;
-	public static ArrayList<DataOutputStream> getOuts() {
-		return outs;
+	private static ArrayList<User> users;
+	public static ArrayList<User> getOuts() {
+		return users;
 	}
-	public static void addOut(DataOutputStream e) {
-		outs.add(e);
+	public static void addUser(User e) {
+		users.add(e);
 	}
-	public static void removeOut(DataOutputStream e){
-		outs.remove(e);
+	public static void removeUser(User e){
+		users.remove(e);
 	}
 
 	public static void main(String[] args) throws IOException{
-		outs = new ArrayList<DataOutputStream>(); 
+		users = new ArrayList<User>(); 
 		final ServerSocket serverSocket = new ServerSocket(27015);
 		ConnectionListener listener = new ConnectionListener(serverSocket);
 		listener.start();
-//		Thread listener = new Thread(){
-//			public void run(){
-//				
-//			}
-//		};
-		listener.start();
-
-		//serverSocket.close();
 	}
 
-	public static void printMessage(String s,DataOutputStream dOut2){
+	public static void printMessage(String s,User user2){
 		System.out.println(s);
-		for(DataOutputStream dOut: outs){
-			if(!dOut.equals(dOut2)){
+		for(User user: users){
+			if(!user.equals(user2)){
 				try {
-					dOut.writeByte(1);
-					dOut.writeUTF(s);
-					dOut.flush();
+					user.send(s, 1);
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

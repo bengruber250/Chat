@@ -115,12 +115,14 @@ public class Client extends JFrame implements Runnable {
 		}
 		return;
 	}
-	private boolean openConnection(String address, int port){
+	private synchronized boolean openConnection(String address, int port){
 		try {		
 			ip = InetAddress.getByName(address);
 			socket = new Socket(ip, port);
 			out = new DataOutputStream(socket.getOutputStream());
 			in = new DataInputStream(socket.getInputStream());
+			out.writeUTF(name);
+			out.flush();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			return false;
@@ -195,22 +197,41 @@ public class Client extends JFrame implements Runnable {
 		setVisible(true);
 		txtMessage.requestFocusInWindow();
 	}
-	public void console(Object message){
+	public synchronized void console(Object message){
 		history.append(message.toString() + "\n\r");
 	}
-	private void send(String message){
-		send(dateFormat.format(Calendar.getInstance().getTime()) +  name + ": " + message, 1);
+	private synchronized void send(String message){
+
 		if (message.equals(""))
 			return;
-
-		console(dateFormat.format(Calendar.getInstance().getTime()) +  name + ": " + message);
+		if (message.charAt(0)=='/'){
+			send(message.substring(1), 2);
+		}
+		else
+			send( message, 1);
+		console(name + ": " + message);
 		txtMessage.setText("");
 	}
-	private void send(final String data, final int type){
+	private synchronized void send(final String data, final int type){
 		send = new Thread("Send"){
 			public void run(){
 				try {
 					out.writeByte(type);
+					if(type==2){
+						String[] datas = data.split(" ");
+						if( datas[0].equalsIgnoreCase("name")){
+							try{
+							name = datas[1];
+							}
+							catch(ArrayIndexOutOfBoundsException e){
+								
+							}
+						}
+						for(String par: datas){
+							out.writeUTF(par);
+						}
+
+					}
 					out.writeUTF(data);
 					out.flush();
 				} catch (IOException e) {

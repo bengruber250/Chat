@@ -17,54 +17,24 @@ public class ConnectionListener extends Thread {
 		try {
 			System.out.println("Listening on port 27015");
 			while(true){
-				Socket socket = serverSocket.accept();
-//				DataInputStream input = new DataInputStream(socket.getInputStream());
-//				DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+				User user = new User(serverSocket.accept(), false);
 				System.out.println("Connection established");
-				handleConnection(socket).start();
+				handleConnection(user).start();
 			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	public static Thread handleConnection(Socket socket){
-		//Server.addOut(dOut);
-		return new Thread(){
-			public void run(){
-				boolean done = false;
-//				try {
-//					while(!done) {
-//						byte messageType = dIn.readByte();
-//
-//						switch(messageType)
-//						{
-//						case 1: // Type A
-//							printMessage(dIn.readUTF(), dOut);
-//							break;
-//						case 2: // Type B
-//							printMessage("Message B: " + dIn.readUTF(), dOut);
-//							break;
-//						case 3: // Type C
-//							printMessage("Message C [1]: " + dIn.readUTF(), dOut);
-//							printMessage("Message C [2]: " + dIn.readUTF(), dOut);
-//							break;
-//						case -1: 
-//							outs.remove(dOut);
-//							dIn.close();
-//							done = true;
-//							break;
-//						default:
-//							done = false;
-//						}
-//					}
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-			}
-		};
-
-
+	public static Thread handleConnection(User user){
+		Server.addUser(user);
+		try {
+			user.setName(user.getInput().readUTF());
+			Server.printMessage( "User " + user.getName() + " has joined.", null);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new SocketListener(user);
 	}
 	
 	

@@ -1,45 +1,49 @@
 package com.ben.chat;
 
+import java.io.DataInputStream;
+import java.io.IOException;
+
 public class SocketListener extends Thread {
 
-	public SocketListener() {
-		// TODO Auto-generated constructor stub
+	private User user;
+	public SocketListener(User user) {
+		this.user = user;
 	}
+	public void run(){
+		DataInputStream dIn = user.getInput();
+		boolean done = false;
+		try {
+			while(!done) {
+				byte messageType = dIn.readByte();
 
-	public SocketListener(Runnable arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(String arg0) {
-		super(arg0);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, Runnable arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, String arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(Runnable arg0, String arg1) {
-		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, Runnable arg1, String arg2) {
-		super(arg0, arg1, arg2);
-		// TODO Auto-generated constructor stub
-	}
-
-	public SocketListener(ThreadGroup arg0, Runnable arg1, String arg2,
-			long arg3) {
-		super(arg0, arg1, arg2, arg3);
-		// TODO Auto-generated constructor stub
+				switch(messageType)
+				{
+				case 1: // Chat messg
+					Server.printMessage(user.getName() + ": " +dIn.readUTF(), user);
+					break;
+				case 2: // Command
+					if(dIn.readUTF().equalsIgnoreCase("name")){
+						String newname = dIn.readUTF();
+						Server.printMessage("User " + user.getName() + " is now " + newname, null);
+						user.setName(newname);
+					}
+					break;
+				case 3: //  set name
+					Server.printMessage("Message C [1]: " + dIn.readUTF(), user);
+					Server.printMessage("Message C [2]: " + dIn.readUTF(), user);
+					break;
+				case -1: 
+					Server.removeUser(user);
+					dIn.close();
+					done = true;
+					break;
+				default:
+					done = false;
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

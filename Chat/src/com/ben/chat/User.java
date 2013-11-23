@@ -11,7 +11,7 @@ public class User {
 	private boolean isAdmin;
 	private DataInputStream input;
 	private DataOutputStream output;
-	public User(Socket socket, String name, boolean isAdmin) {
+	public User(Socket socket, boolean isAdmin) {
 		super();
 		this.socket = socket;
 		this.name = name;
@@ -23,6 +23,21 @@ public class User {
 			e.printStackTrace();
 		}
 
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
+	public boolean isAdmin() {
+		return isAdmin;
+	}
+	public void setAdmin(boolean isAdmin) {
+		this.isAdmin = isAdmin;
+	}
+	public DataInputStream getInput() {
+		return input;
 	}
 	public synchronized void send(String contents, int type) throws IOException{
 		output.writeByte(type);
