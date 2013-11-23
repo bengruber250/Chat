@@ -1,41 +1,52 @@
 package com.ben.chat;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.ArrayList;
 
 public class Server {
 
-
-	private static ArrayList<User> users;
-	public static ArrayList<User> getUsers() {
-		return users;
-	}
-	public static void addUser(User e) {
-		users.add(e);
-	}
-	public static void removeUser(User e){
-		users.remove(e);
-	}
 	/**
 	 * @param args
 	 * @throws IOException 
 	 */
+	private static ArrayList<DataOutputStream> outs;
+	public static ArrayList<DataOutputStream> getOuts() {
+		return outs;
+	}
+	public static void addOut(DataOutputStream e) {
+		outs.add(e);
+	}
+	public static void removeOut(DataOutputStream e){
+		outs.remove(e);
+	}
+
 	public static void main(String[] args) throws IOException{
-		users = new ArrayList<User>(); 
+		outs = new ArrayList<DataOutputStream>(); 
 		final ServerSocket serverSocket = new ServerSocket(27015);
 		ConnectionListener listener = new ConnectionListener(serverSocket);
+		listener.start();
+//		Thread listener = new Thread(){
+//			public void run(){
+//				
+//			}
+//		};
 		listener.start();
 
 		//serverSocket.close();
 	}
 
-	public static void printMessage(String s,User user2){
+	public static void printMessage(String s,DataOutputStream dOut2){
 		System.out.println(s);
-		for(User user: users){
-			if(!user.equals(user2)){
+		for(DataOutputStream dOut: outs){
+			if(!dOut.equals(dOut2)){
 				try {
-					user.send(s, 1);
+					dOut.writeByte(1);
+					dOut.writeUTF(s);
+					dOut.flush();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

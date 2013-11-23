@@ -29,7 +29,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
-public final class Client extends JFrame implements Runnable {
+public class Client extends JFrame implements Runnable {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private String name, address;
