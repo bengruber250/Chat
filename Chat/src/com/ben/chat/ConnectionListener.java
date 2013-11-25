@@ -1,10 +1,7 @@
 package com.ben.chat;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 
 
 public class ConnectionListener extends Thread {
@@ -36,7 +33,7 @@ public class ConnectionListener extends Thread {
 		}
 		return new SocketListener(user);
 	}
-	
-	
+
+
 
 }

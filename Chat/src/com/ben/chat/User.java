@@ -14,20 +14,19 @@ public class User {
 	public User(Socket socket, boolean isAdmin) {
 		super();
 		this.socket = socket;
-		this.name = name;
 		this.isAdmin = isAdmin;
 		try {
-			this.input = new DataInputStream(socket.getInputStream());
-			this.output = new DataOutputStream(socket.getOutputStream());
+			this.input = new DataInputStream(this.socket.getInputStream());
+			this.output = new DataOutputStream(this.socket.getOutputStream());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
 	}
-	public String getName() {
+	public synchronized String getName() {
 		return name;
 	}
-	public void setName(String name) {
+	public synchronized void setName(String name) {
 		this.name = name;
 	}
 	public boolean isAdmin() {

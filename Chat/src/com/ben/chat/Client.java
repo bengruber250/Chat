@@ -16,9 +16,6 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -29,14 +26,13 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
-public class Client extends JFrame implements Runnable {
+public final class Client extends JFrame implements Runnable {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private String name, address;
 	private int port;
 	private JTextField txtMessage;
 	private JTextArea history;
-	private DateFormat dateFormat;
 	private DefaultCaret caret;
 	private Socket socket;
 	private InetAddress ip;
@@ -52,7 +48,6 @@ public class Client extends JFrame implements Runnable {
 	 */
 	public Client(String name, String address, int port) {
 
-		dateFormat = new SimpleDateFormat("(MM/dd/yy HH:mm:ss)");
 		setTitle("Chat Client");
 		this.port = port;
 		this.name = name;
@@ -60,12 +55,6 @@ public class Client extends JFrame implements Runnable {
 
 		createWindow();
 		run();
-		final Thread listen = new Thread(){
-			public void run(){
-				receive();
-			}
-		};
-		listen.start();
 		addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
 			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
@@ -73,19 +62,18 @@ public class Client extends JFrame implements Runnable {
 					out.writeByte(-1);
 					out.flush();
 					close = true;
-					listen.join();
 					in.close();
 					out.close();
 				} 
 				catch(EOFException e){
 
 				}catch (IOException e) {
-					e.printStackTrace();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					//Close please
+					close = true;
 				}
-
+				catch(NullPointerException e){
+					close = true;
+				}
 				System.exit(0);
 
 			}
@@ -110,13 +98,15 @@ public class Client extends JFrame implements Runnable {
 				}
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return;
 	}
 	private synchronized boolean openConnection(String address, int port){
-		try {		
+		try {
+			if(!address.matches("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b")){
+				throw new NumberFormatException("Bad IP.");
+			}
 			ip = InetAddress.getByName(address);
 			socket = new Socket(ip, port);
 			out = new DataOutputStream(socket.getOutputStream());
@@ -124,10 +114,16 @@ public class Client extends JFrame implements Runnable {
 			out.writeUTF(name);
 			out.flush();
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			console(e.getMessage());
 			return false;
+			
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println(e.getClass());
+			console(e.getMessage());
+			return false;
+		}
+		catch(Exception e){
+			console(e.getMessage());
 			return false;
 		}
 		return true;
@@ -220,20 +216,22 @@ public class Client extends JFrame implements Runnable {
 					if(type==2){
 						String[] datas = data.split(" ");
 						if( datas[0].equalsIgnoreCase("name")){
-							try{
-							name = datas[1];
-							}
-							catch(ArrayIndexOutOfBoundsException e){
-								
-							}
+							StringBuilder sb = new StringBuilder();
+							sb.append(datas[2]);
+							for(int i =2; i<datas.length;i++)
+								sb.append(" "+datas[i]);
+							name = sb.toString();
 						}
 						for(String par: datas){
 							out.writeUTF(par);
 						}
+						out.flush();
 
 					}
-					out.writeUTF(data);
-					out.flush();
+					else{
+						out.writeUTF(data);
+						out.flush();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -245,18 +243,20 @@ public class Client extends JFrame implements Runnable {
 	@Override
 	public void run() {
 		boolean connect = false;
-		for(int i =0; i<10&&!connect; i++){
-			console("Attempting a connection with name " + name + " at " + address + ":" + port);
-			connect = openConnection(address,port);
-			if(!connect){
-				console("Connection failed.");
-			}
-		}
+		console("Attempting a connection with name " + name + " at " + address + ":" + port);
+		connect = openConnection(address,port);
 		if(!connect){
-			System.err.println("fail");
+			console("Connection attempt failed.");
 		}
-		else
+		else{
 			console("Connected to server.");
+			final Thread listen = new Thread(){
+				public void run(){
+					receive();
+				}
+			};
+			listen.start();
+		}
 	}
 
 }

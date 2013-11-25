@@ -2,6 +2,8 @@ package com.ben.chat;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class SocketListener extends Thread {
 
@@ -22,15 +24,24 @@ public class SocketListener extends Thread {
 					Server.printMessage(user.getName() + ": " +dIn.readUTF(), user);
 					break;
 				case 2: // Command
-					if(dIn.readUTF().equalsIgnoreCase("name")){
-						String newname = dIn.readUTF();
-						Server.printMessage("User " + user.getName() + " is now " + newname, null);
-						user.setName(newname);
+					ArrayList<String> command = new ArrayList<String>();
+					while(dIn.available()>0){
+						command.add(dIn.readUTF());
 					}
-					break;
-				case 3: //  set name
-					Server.printMessage("Message C [1]: " + dIn.readUTF(), user);
-					Server.printMessage("Message C [2]: " + dIn.readUTF(), user);
+					Iterator<String> commandIterator = command.iterator();
+					commandIterator.next();
+					
+					/*Command Handler*/
+					switch(command.get(0).toLowerCase()){
+					case "name":
+						StringBuilder sb = new StringBuilder();
+						sb.append(commandIterator.next());
+						while(commandIterator.hasNext()){
+							sb.append(" " +commandIterator.next());
+						}
+						Server.printMessage("User " + user.getName() + " is now " + sb.toString(), null);
+						user.setName(sb.toString());
+					}
 					break;
 				case -1: 
 					Server.removeUser(user);
