@@ -1,7 +1,6 @@
 package com.ben.chat;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 
 import javax.net.ssl.SSLServerSocket;
