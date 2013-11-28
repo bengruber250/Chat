@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
 
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+
 public class Server {
 
 	/**
@@ -23,7 +26,7 @@ public class Server {
 
 	public static void main(String[] args) throws IOException{
 		users = new ArrayList<User>(); 
-		final ServerSocket serverSocket = new ServerSocket(27015);
+		final SSLServerSocket serverSocket = (SSLServerSocket) SSLServerSocketFactory.getDefault().createServerSocket(27015);
 		ConnectionListener listener = new ConnectionListener(serverSocket);
 		listener.start();
 	}

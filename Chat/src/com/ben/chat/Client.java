@@ -14,9 +14,10 @@ import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -34,7 +35,7 @@ public final class Client extends JFrame implements Runnable {
 	private JTextField txtMessage;
 	private JTextArea history;
 	private DefaultCaret caret;
-	private Socket socket;
+	private SSLSocket socket;
 	private InetAddress ip;
 	private Thread send;
 	private DataOutputStream out;
@@ -104,11 +105,13 @@ public final class Client extends JFrame implements Runnable {
 	}
 	private synchronized boolean openConnection(String address, int port){
 		try {
-			if(!address.matches("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b")){
-				throw new NumberFormatException("Bad IP.");
-			}
+			//This won't match hostnames so kind of hard.
+			//Maybe test resolve TODO
+//			if(!address.matches("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b")){
+//				throw new NumberFormatException("Bad IP.");
+//			}
 			ip = InetAddress.getByName(address);
-			socket = new Socket(ip, port);
+			socket = (SSLSocket) SSLSocketFactory.getDefault().createSocket(ip, port);
 			out = new DataOutputStream(socket.getOutputStream());
 			in = new DataInputStream(socket.getInputStream());
 			out.writeUTF(name);
@@ -215,9 +218,10 @@ public final class Client extends JFrame implements Runnable {
 					out.writeByte(type);
 					if(type==2){
 						String[] datas = data.split(" ");
+						out.writeByte(datas.length);
 						if( datas[0].equalsIgnoreCase("name")){
 							StringBuilder sb = new StringBuilder();
-							sb.append(datas[2]);
+							sb.append(datas[1]);
 							for(int i =2; i<datas.length;i++)
 								sb.append(" "+datas[i]);
 							name = sb.toString();

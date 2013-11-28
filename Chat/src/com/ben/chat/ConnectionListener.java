@@ -1,12 +1,14 @@
 package com.ben.chat;
 
 import java.io.IOException;
-import java.net.ServerSocket;
+
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLSocket;
 
 
 public class ConnectionListener extends Thread {
-	private ServerSocket serverSocket;
-	public ConnectionListener(ServerSocket serverSocket){
+	private SSLServerSocket serverSocket;
+	public ConnectionListener(SSLServerSocket serverSocket){
 		this.serverSocket = serverSocket;
 	}
 	@Override
@@ -14,7 +16,7 @@ public class ConnectionListener extends Thread {
 		try {
 			System.out.println("Listening on port 27015");
 			while(true){
-				User user = new User(serverSocket.accept(), false);
+				User user = new User((SSLSocket) serverSocket.accept(), false);
 				System.out.println("Connection established");
 				handleConnection(user).start();
 			}

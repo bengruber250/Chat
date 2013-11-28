@@ -24,8 +24,9 @@ public class SocketListener extends Thread {
 					Server.printMessage(user.getName() + ": " +dIn.readUTF(), user);
 					break;
 				case 2: // Command
+					int iterations = dIn.readByte();
 					ArrayList<String> command = new ArrayList<String>();
-					while(dIn.available()>0){
+					for(int i=0;i<iterations;i++){
 						command.add(dIn.readUTF());
 					}
 					Iterator<String> commandIterator = command.iterator();

@@ -3,15 +3,16 @@ package com.ben.chat;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.Socket;
+
+import javax.net.ssl.SSLSocket;
 
 public class User {
-	private Socket socket;
+	private SSLSocket socket;
 	private String name;
 	private boolean isAdmin;
 	private DataInputStream input;
 	private DataOutputStream output;
-	public User(Socket socket, boolean isAdmin) {
+	public User(SSLSocket socket, boolean isAdmin) {
 		super();
 		this.socket = socket;
 		this.isAdmin = isAdmin;
